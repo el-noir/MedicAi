@@ -35,4 +35,4 @@ A blockchain-powered health diagnosis platform where AI predictions are verified
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/MedicAi.git
+git clone https://github.com/el-noir/MedicAi.git

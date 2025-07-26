@@ -2,7 +2,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
 import { Mail, ArrowLeft, CheckCircle, AlertCircle, Stethoscope } from 'lucide-react'
-import { authAPI } from "../services/api"
+import { authAPI } from "../../services/api.js"
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("")

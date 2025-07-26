@@ -6,18 +6,18 @@ import { AuthProvider } from "./context/AuthContext"
 import Layout from "./Layout.jsx"
 import Home from "./components/Home.jsx"
 import Predict from "./components/Predict.jsx"
-import Login from "./Auth/Login.jsx"
-import Signup from "./Auth/Signup.jsx"
+import Login from "./components/Auth/Login.jsx"
+import Signup from "./components/Auth/Signup.jsx"
 import Dashboard from "./components/Dashboard/Dashboard.jsx"
 import ProtectedRoute from "./components/ProtectedRoute.jsx"
-import ForgotPassword from "./Auth/ForgotPassword.jsx"
-import ResetPassword from "./Auth/ResetPassword.jsx"
-import Profile from "./components/Profile/Profile.jsx"
+import ForgotPassword from "./components/Auth/ForgotPassword.jsx"
+// import ResetPassword from "./Auth/ResetPassword.jsx"
+// import Profile from "./components/Profile/Profile.jsx"
 import About from "./components/About.jsx"
 import NotFound from "./components/NotFound.jsx"
-import PatientsPage from "./components/PatientsPage.jsx"
-import AnalyticsPage from "./components/AnalyticsPage.jsx"
-import AdminDashboard from "./components/AdminDashboard.jsx"
+// import PatientsPage from "./components/PatientsPage.jsx"
+// import AnalyticsPage from "./components/AnalyticsPage.jsx"
+// import AdminDashboard from "./components/Dashboard/AdminDashBoard"
 import UnauthorizedPage from "./components/UnauthorizedPage.jsx"
 
 const router = createBrowserRouter(
@@ -29,7 +29,7 @@ const router = createBrowserRouter(
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password/:token" element={<ResetPassword />} />
+      {/* <Route path="/reset-password/:token" element={<ResetPassword />} /> */}
 
       {/* Semi-Protected Routes (can be accessed without auth but better with auth) */}
       <Route path="/prediction" element={<Predict />} />
@@ -43,16 +43,16 @@ const router = createBrowserRouter(
           </ProtectedRoute>
         }
       />
-      <Route
+      {/* <Route
         path="/profile"
         element={
           <ProtectedRoute>
             <Profile />
           </ProtectedRoute>
         }
-      />
+      /> */}
 
-      {/* Doctor-Only Routes */}
+      {/* Doctor-Only Routes
       <Route
         path="/patients"
         element={
@@ -60,25 +60,25 @@ const router = createBrowserRouter(
             <PatientsPage />
           </ProtectedRoute>
         }
-      />
-      <Route
+      /> */}
+      {/* <Route
         path="/analytics"
         element={
           <ProtectedRoute requiredRole="doctor">
             <AnalyticsPage />
           </ProtectedRoute>
         }
-      />
+      /> */}
 
-      {/* Admin-Only Routes */}
+      {/* Admin-Only Routes
       <Route
         path="/admin"
         element={
           <ProtectedRoute requiredRole="admin">
             <AdminDashboard />
           </ProtectedRoute>
-        }
-      />
+        } */}
+      {/* /> */}
 
       {/* Error Routes */}
       <Route path="/unauthorized" element={<UnauthorizedPage />} />

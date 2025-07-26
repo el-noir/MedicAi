@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { Eye, EyeOff, Mail, Lock, AlertCircle, Stethoscope } from "lucide-react"
-import { useAuth } from "../context/AuthContext"
+import { useAuth } from "../../context/AuthContext"
 
 const Login = () => {
   const [formData, setFormData] = useState({

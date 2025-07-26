@@ -1,72 +1,88 @@
-import axios from 'axios'
-import conf from '../conf/conf.js'
+import axios from "axios"
+import conf from "../conf/conf"
 
+// Create axios instance with proper CORS configuration
 const api = axios.create({
   baseURL: conf.backendUrl,
   withCredentials: true,
+  timeout: 10000,
   headers: {
-    'Content-Type': 'application/json'
-  }
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
 })
 
+// Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken')
+    const token = localStorage.getItem("accessToken")
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },
   (error) => {
+    console.error("Request interceptor error:", error)
     return Promise.reject(error)
-  }
+  },
 )
 
+// Response interceptor to handle token refresh
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config
 
+    // Handle network errors
+    if (!error.response) {
+      console.error("Network error:", error.message)
+      return Promise.reject(new Error("Network error. Please check your connection."))
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
 
       try {
-        const refreshToken = localStorage.getItem('refreshToken')
+        const refreshToken = localStorage.getItem("refreshToken")
         if (refreshToken) {
-          const response = await axios.post(`${conf.backendUrl}/api/v1/users/refresh-token`, {
-            refreshToken
-          })
+          const response = await axios.post(
+            `${conf.backendUrl}/api/v1/users/refresh-token`,
+            { refreshToken },
+            { withCredentials: true },
+          )
 
-          const { accessToken } = response.data
-          localStorage.setItem('accessToken', accessToken)
+          const { accessToken } = response.data.data
+          localStorage.setItem("accessToken", accessToken)
 
+          // Retry original request with new token
           originalRequest.headers.Authorization = `Bearer ${accessToken}`
           return api(originalRequest)
         }
       } catch (refreshError) {
-
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
-        window.location.href = '/login'
+        console.error("Token refresh failed:", refreshError)
+        // Refresh failed, redirect to login
+        localStorage.removeItem("accessToken")
+        localStorage.removeItem("refreshToken")
+        window.location.href = "/login"
         return Promise.reject(refreshError)
       }
     }
 
     return Promise.reject(error)
-  }
+  },
 )
 
 // Auth API endpoints
 export const authAPI = {
-  register: (userData) => api.post('/api/v1/users/register', userData),
-  login: (credentials) => api.post('/api/v1/users/login', credentials),
-  logout: () => api.post('/api/v1/users/logout'),
-  verifyOTP: (data) => api.post('/api/v1/users/verify-otp', data),
-  resendOTP: (data) => api.post('/api/v1/users/resend-otp', data),
-  getCurrentUser: () => api.get('/api/v1/users/me'),
-  forgotPassword: (email) => api.post('/api/v1/users/forgot-password', { email }),
+  register: (userData) => api.post("/api/v1/users/register", userData),
+  login: (credentials) => api.post("/api/v1/users/login", credentials),
+  logout: () => api.post("/api/v1/users/logout"),
+  verifyOTP: (data) => api.post("/api/v1/users/verify-otp", data),
+  resendOTP: (data) => api.post("/api/v1/users/resend-otp", data),
+  getCurrentUser: () => api.get("/api/v1/users/me"),
+  forgotPassword: (email) => api.post("/api/v1/users/forgot-password", { email }),
   resetPassword: (token, password) => api.post(`/api/v1/users/reset-password/${token}`, { password }),
-  refreshToken: (refreshToken) => api.post('/api/v1/users/refresh-token', { refreshToken })
+  refreshToken: (refreshToken) => api.post("/api/v1/users/refresh-token", { refreshToken }),
 }
 
 export default api

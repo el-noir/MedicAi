@@ -13,7 +13,7 @@ export const usePrediction = () => {
   useEffect(() => {
     const fetchSymptoms = async () => {
       try {
-        const response = await fetch("http://localhost:5000/symptoms")
+        const response = await fetch("http://localhost:5000/api/symptoms")
         if (!response.ok) throw new Error("Failed to fetch symptoms")
         const data = await response.json()
         setAvailableSymptoms(data.symptoms || data)
@@ -35,7 +35,7 @@ export const usePrediction = () => {
     setError(null)
 
     try {
-      const response = await fetch("http://localhost:5000/predict", {
+      const response = await fetch("http://localhost:5000/api/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

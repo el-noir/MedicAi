@@ -1,12 +1,38 @@
-# React + Vite
+# MedicAI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![MedicAI Banner](https://via.placeholder.com/1200x400?text=SymptomAI+Decentralized+Health+Platform)
 
-Currently, two official plugins are available:
+A blockchain-powered health diagnosis platform where AI predictions are verified by doctors, who earn crypto rewards for validation.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🌟 Features
 
-## Expanding the ESLint configuration
+- 🤖 AI-powered symptom analysis (94% accuracy)
+- 👩⚕️ Doctor verification system with crypto incentives
+- 🔒 Privacy-preserving decentralized architecture
+- 💰 ERC-20 token rewards for medical professionals
+- 📱 Modern responsive interface
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🛠 Tech Stack
+
+| Component       | Technology                          |
+|-----------------|-------------------------------------|
+| Frontend        | React, Tailwind CSS, Framer Motion  |
+| Backend         | Node.js/Express                     |
+| Smart Contracts | Solidity (Ethereum)                 |
+| AI Model        | Python (PyTorch/TensorFlow)         |
+| Storage         | IPFS                                |
+| Identity        | Polygon ID                          |
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js v18+
+- Python 3.10+
+- Foundry/Hardhat
+- MetaMask wallet
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/el-noir/MedicAi.git

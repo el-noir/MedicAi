@@ -1,6 +1,6 @@
-import { useAuth } from "../../hooks/useAuth"
-import UserDashboard from "./UserDashboard"
-import DoctorDashboard from "./DoctorDashboard"
+import { useAuth } from "../../hooks/useAuth.js"
+import UserDashboard from "./UserDashboard.jsx"
+import DoctorDashboard from "./DoctorDashboard.jsx"
 import LoadingSpinner from "../LoadingSpinner"
 
 const Dashboard = () => {

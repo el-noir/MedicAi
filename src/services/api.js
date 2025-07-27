@@ -83,6 +83,16 @@ export const authAPI = {
   forgotPassword: (email) => api.post("/api/v1/users/forgot-password", { email }),
   resetPassword: (token, password) => api.post(`/api/v1/users/reset-password/${token}`, { password }),
   refreshToken: (refreshToken) => api.post("/api/v1/users/refresh-token", { refreshToken }),
+  updateProfile: (data) => api.put("/api/v1/users/profile", data),
+}
+
+// Prediction API endpoints
+export const predictionAPI = {
+  predict: (data) => api.post("/api/v1/predictions/predict", data),
+  savePrediction: (data) => api.post("/api/v1/predictions/save", data),
+  getUserPredictions: () => api.get("/api/v1/predictions/user"),
+  deletePrediction: (id) => api.delete(`/api/v1/predictions/${id}`),
+  getPredictionById: (id) => api.get(`/api/v1/predictions/${id}`),
 }
 
 export default api

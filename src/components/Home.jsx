@@ -397,8 +397,11 @@ export default function Home() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            Start Your Free Analysis
+            <Link to='/prediction' className='flex items-center'>
+                        Start Your Free Analysis
             <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
+            </Link>
+
           </motion.button>
           
           <motion.div 

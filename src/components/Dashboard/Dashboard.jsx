@@ -1,4 +1,4 @@
-import { useAuth } from "../../context/AuthContext"
+import { useAuth } from "../../hooks/useAuth"
 import UserDashboard from "./UserDashboard"
 import DoctorDashboard from "./DoctorDashboard"
 import LoadingSpinner from "../LoadingSpinner"

@@ -15,7 +15,7 @@ import {
   Award,
   Clock,
 } from "lucide-react"
-import { useAuth } from "../../context/AuthContext"
+import { useAuth } from "../../hooks/useAuth.js"
 
 const Signup = () => {
   const [step, setStep] = useState(1) // 1: Role Selection, 2: Form, 3: OTP Verification
@@ -40,12 +40,13 @@ const Signup = () => {
     email: "",
   })
 
-  const { register, verifyOTP, resendOTP, isLoading, error, clearError, registrationData, isVerifying } = useAuth()
+  const { register, verifyOTP, resendOTP, isLoading, error, clearError, registrationData, isVerifying, otpCooldown } =
+    useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
     clearError()
-  }, [])
+  }, [clearError])
 
   const roleOptions = [
     {
@@ -155,14 +156,16 @@ const Signup = () => {
     const result = await verifyOTP(otpData.email, otpData.otp)
 
     if (result.success) {
-      navigate("/dashboard")
+      navigate("/prediction")
     }
   }
 
   const handleResendOTP = async () => {
+    if (otpCooldown > 0) return
+
     const result = await resendOTP(otpData.email)
     if (result.success) {
-      // Show success message
+      // Success message handled by Redux
     }
   }
 
@@ -620,9 +623,12 @@ const Signup = () => {
                 <button
                   type="button"
                   onClick={handleResendOTP}
-                  className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors text-sm"
+                  disabled={otpCooldown > 0}
+                  className={`font-medium transition-colors text-sm ${
+                    otpCooldown > 0 ? "text-gray-500 cursor-not-allowed" : "text-cyan-400 hover:text-cyan-300"
+                  }`}
                 >
-                  Resend Code
+                  {otpCooldown > 0 ? `Resend in ${otpCooldown}s` : "Resend Code"}
                 </button>
               </div>
             </motion.form>

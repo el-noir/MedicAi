@@ -1,17 +1,7 @@
 import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
-import {
-  Users,
-  Calendar,
-  FileText,
-  TrendingUp,
-  Clock,
-  AlertCircle,
-  CheckCircle,
-  UserCheck,
-  Stethoscope,
-} from "lucide-react"
-import { useAuth } from "../../context/AuthContext"
+import { Users, Calendar, FileText, TrendingUp, Clock, AlertCircle, CheckCircle, UserCheck, Stethoscope } from 'lucide-react'
+import { useAuth } from "../../hooks/useAuth"
 
 const DoctorDashboard = () => {
   const { user } = useAuth()

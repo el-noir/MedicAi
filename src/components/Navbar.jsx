@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Stethoscope, Menu, X, User, LogOut, Settings } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Link, useNavigate } from "react-router-dom"
-import { useAuth } from "../context/AuthContext"
+import { useAuth } from "../hooks/useAuth"
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)

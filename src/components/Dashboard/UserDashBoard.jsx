@@ -18,7 +18,7 @@ const UserDashboard = () => {
       title: "Health History",
       description: "View past analyses",
       icon: <FileText className="w-6 h-6" />,
-      link: "/history",
+      link: "/profile",
       color: "from-green-500 to-emerald-600",
     },
     {
@@ -143,7 +143,7 @@ const UserDashboard = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-white">Recent Analyses</h2>
-            <Link to="/history" className="text-cyan-400 hover:text-cyan-300 transition-colors">
+            <Link to="/profile" className="text-cyan-400 hover:text-cyan-300 transition-colors">
               View All
             </Link>
           </div>

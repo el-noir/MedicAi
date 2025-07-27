@@ -1,7 +1,7 @@
-import { useAuth } from "../../hooks/useAuth.js"
+import { useAuth } from "../../hooks/useAuth"
 import UserDashboard from "./UserDashboard.jsx"
 import DoctorDashboard from "./DoctorDashboard.jsx"
-import LoadingSpinner from "../LoadingSpinner"
+import LoadingSpinner from "../LoadingSpinner.jsx"
 
 const Dashboard = () => {
   const { user, isLoading } = useAuth()
@@ -14,7 +14,6 @@ const Dashboard = () => {
     return <LoadingSpinner message="Loading user data..." />
   }
 
-  // Render appropriate dashboard based on user role
   switch (user.role) {
     case "doctor":
       return <DoctorDashboard />

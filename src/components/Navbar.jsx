@@ -31,7 +31,7 @@ function Navbar() {
                 <Stethoscope className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                SymptomAI
+               MedicAI
               </span>
             </Link>
           </motion.div>

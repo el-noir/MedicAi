@@ -5,7 +5,7 @@ import conf from "../conf/conf"
 const api = axios.create({
   baseURL: conf.backendUrl,
   withCredentials: true,
-  timeout: 10000,
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -95,6 +95,22 @@ export const predictionAPI = {
   deletePrediction: (id) => api.delete(`/api/v1/predictions/${id}`),
   // Get prediction statistics
   getPredictionStats: () => api.get("/api/v1/predictions/stats"),
+}
+
+// Shared Prediction API endpoints
+export const sharedPredictionAPI = {
+  // Share prediction with doctor
+  sharePrediction: (data) => api.post("/api/v1/shared-predictions/share", data),
+  // Get user's shared predictions
+  getUserSharedPredictions: (params = {}) => api.get("/api/v1/shared-predictions/my-shares", { params }),
+  // Get doctor's received predictions
+  getDoctorReceivedPredictions: (params = {}) => api.get("/api/v1/shared-predictions/received", { params }),
+  // View shared prediction (for doctors)
+  viewSharedPrediction: (shareCode) => api.get(`/api/v1/shared-predictions/view/${shareCode}`),
+  // Respond to shared prediction (for doctors)
+  respondToSharedPrediction: (shareCode, data) => api.post(`/api/v1/shared-predictions/respond/${shareCode}`, data),
+  // Revoke shared prediction access
+  revokeSharedPrediction: (shareId) => api.patch(`/api/v1/shared-predictions/revoke/${shareId}`),
 }
 
 export default api

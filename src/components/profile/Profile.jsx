@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { useSelector, useDispatch } from "react-redux"
@@ -15,9 +17,11 @@ import {
   Eye,
   AlertCircle,
   CheckCircle,
+  Share2,
 } from "lucide-react"
 import { fetchUserPredictions, deletePrediction } from "../../store/slices/predictionSlice"
 import { authAPI } from "../../services/api"
+import SharePredictionModal from "./SharePredictionModal"
 
 const Profile = () => {
   const dispatch = useDispatch()
@@ -32,6 +36,10 @@ const Profile = () => {
   const [selectedPrediction, setSelectedPrediction] = useState(null)
   const [updateLoading, setUpdateLoading] = useState(false)
   const [updateMessage, setUpdateMessage] = useState("")
+
+  // Share functionality state
+  const [shareModalOpen, setShareModalOpen] = useState(false)
+  const [selectedPredictionToShare, setSelectedPredictionToShare] = useState(null)
 
   useEffect(() => {
     dispatch(fetchUserPredictions())
@@ -72,6 +80,17 @@ const Profile = () => {
     if (window.confirm("Are you sure you want to delete this prediction?")) {
       dispatch(deletePrediction(predictionId))
     }
+  }
+
+  const handleSharePrediction = (prediction) => {
+    setSelectedPredictionToShare(prediction)
+    setShareModalOpen(true)
+  }
+
+  const handleShareSuccess = () => {
+    // Optionally refresh the predictions list or show a success message
+    setUpdateMessage("Prediction shared successfully!")
+    setTimeout(() => setUpdateMessage(""), 3000)
   }
 
   const formatDate = (dateString) => {
@@ -312,7 +331,9 @@ const Profile = () => {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-white font-semibold">{prediction.result?.prediction || "Analysis"}</h3>
+                            <h3 className="text-white font-semibold capitalize">
+                              {prediction.result?.prediction?.replace(/_/g, " ") || "Analysis"}
+                            </h3>
                             <span
                               className={`px-2 py-1 rounded-full text-xs font-medium ${getRiskColor(
                                 prediction.result?.riskLevel,
@@ -322,12 +343,17 @@ const Profile = () => {
                             </span>
                             {prediction.result?.confidence && (
                               <span className="text-xs text-gray-400">
-                                {Math.round(prediction.result.confidence)}% confidence
+                                {Math.round(prediction.result.confidence * 100)}% confidence
                               </span>
                             )}
                           </div>
                           <p className="text-gray-300 text-sm mb-2">
-                            <strong>Symptoms:</strong> {prediction.symptoms?.join(", ") || "N/A"}
+                            <strong>Symptoms:</strong>{" "}
+                            {prediction.symptoms
+                              ?.slice(0, 3)
+                              .map((s) => s.replace(/_/g, " "))
+                              .join(", ") || "N/A"}
+                            {prediction.symptoms?.length > 3 && ` +${prediction.symptoms.length - 3} more`}
                           </p>
                           <p className="text-gray-400 text-xs">{formatDate(prediction.timestamp)}</p>
                         </div>
@@ -335,12 +361,21 @@ const Profile = () => {
                           <button
                             onClick={() => setSelectedPrediction(prediction)}
                             className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
+                            title="View Details"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
+                            onClick={() => handleSharePrediction(prediction)}
+                            className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
+                            title="Share with Doctor"
+                          >
+                            <Share2 className="w-4 h-4" />
+                          </button>
+                          <button
                             onClick={() => handleDeletePrediction(prediction._id)}
                             className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                            title="Delete Analysis"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -382,18 +417,32 @@ const Profile = () => {
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-white">Analysis Details</h3>
-                <button
-                  onClick={() => setSelectedPrediction(null)}
-                  className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      setSelectedPrediction(null)
+                      handleSharePrediction(selectedPrediction)
+                    }}
+                    className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
+                    title="Share with Doctor"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setSelectedPrediction(null)}
+                    className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-4">
                 <div>
                   <h4 className="text-lg font-semibold text-white mb-2">Diagnosis</h4>
-                  <p className="text-gray-300">{selectedPrediction.result?.prediction || "N/A"}</p>
+                  <p className="text-gray-300 capitalize">
+                    {selectedPrediction.result?.prediction?.replace(/_/g, " ") || "N/A"}
+                  </p>
                 </div>
 
                 <div>
@@ -401,7 +450,7 @@ const Profile = () => {
                   <div className="flex flex-wrap gap-2">
                     {selectedPrediction.symptoms?.map((symptom, index) => (
                       <span key={index} className="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-sm">
-                        {symptom}
+                        {symptom.replace(/_/g, " ")}
                       </span>
                     ))}
                   </div>
@@ -422,18 +471,20 @@ const Profile = () => {
                     <h4 className="text-lg font-semibold text-white mb-2">Confidence</h4>
                     <p className="text-gray-300">
                       {selectedPrediction.result?.confidence
-                        ? `${Math.round(selectedPrediction.result.confidence)}%`
+                        ? `${Math.round(selectedPrediction.result.confidence * 100)}%`
                         : "N/A"}
                     </p>
                   </div>
                 </div>
 
-                {selectedPrediction.result?.recommendations && (
+                {selectedPrediction.result?.recommendations && selectedPrediction.result.recommendations.length > 0 && (
                   <div>
                     <h4 className="text-lg font-semibold text-white mb-2">Recommendations</h4>
                     <ul className="list-disc list-inside space-y-1 text-gray-300">
                       {selectedPrediction.result.recommendations.map((rec, index) => (
-                        <li key={index}>{rec}</li>
+                        <li key={index} className="capitalize">
+                          {rec.replace(/_/g, " ")}
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -447,6 +498,17 @@ const Profile = () => {
             </motion.div>
           </motion.div>
         )}
+
+        {/* Share Prediction Modal */}
+        <SharePredictionModal
+          prediction={selectedPredictionToShare}
+          isOpen={shareModalOpen}
+          onClose={() => {
+            setShareModalOpen(false)
+            setSelectedPredictionToShare(null)
+          }}
+          onSuccess={handleShareSuccess}
+        />
       </div>
     </div>
   )

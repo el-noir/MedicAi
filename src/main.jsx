@@ -117,7 +117,7 @@ const router = createBrowserRouter(
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
-
+      
       {/* Semi-Protected Routes */}
       <Route path="/prediction" element={<Predict />} />
 
@@ -158,8 +158,10 @@ const router = createBrowserRouter(
       />
 
       {/* Error Routes */}
+      
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
-      <Route path="*" element={<NotFound />} />
+          <Route path="/404" element={<NotFound />} />
+          <Route path="*" element={<Navigate to="/404" replace />} />
     </Route>,
   ),
 )

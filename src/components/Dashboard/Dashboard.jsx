@@ -253,9 +253,6 @@
 
 // export default Dashboard
 
-
-"use client"
-
 import { useAuth } from "../../hooks/useAuth.js"
 import UserDashboard from "./UserDashboard.jsx"
 import DoctorDashboard from "./DoctorDashboard.jsx"

@@ -5,19 +5,36 @@ import conf from "../conf/conf"
 const api = axios.create({
   baseURL: conf.backendUrl,
   withCredentials: true,
-  timeout: 30000,
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
 })
 
+// Helper function to clean token
+const cleanToken = (token) => {
+  if (!token) return null
+  return token.trim().replace(/^Bearer\s+/i, "")
+}
+
+// Helper function to validate JWT format
+const isValidJWT = (token) => {
+  if (!token) return false
+  const parts = token.split(".")
+  return parts.length === 3
+}
+
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("accessToken")
-    if (token) {
+    const token = cleanToken(localStorage.getItem("accessToken"))
+    if (token && isValidJWT(token)) {
       config.headers.Authorization = `Bearer ${token}`
+    } else if (token) {
+      console.warn("Invalid token format detected, removing from localStorage")
+      localStorage.removeItem("accessToken")
+      localStorage.removeItem("refreshToken")
     }
     return config
   },
@@ -41,26 +58,50 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
+
       try {
-        const refreshToken = localStorage.getItem("refreshToken")
-        if (refreshToken) {
+        const refreshToken = cleanToken(localStorage.getItem("refreshToken"))
+
+        if (refreshToken && isValidJWT(refreshToken)) {
+          console.log("Attempting token refresh...")
           const response = await axios.post(
             `${conf.backendUrl}/api/v1/users/refresh-token`,
             { refreshToken },
-            { withCredentials: true },
+            {
+              withCredentials: true,
+              headers: {
+                "Content-Type": "application/json",
+              },
+            },
           )
-          const { accessToken } = response.data.data
-          localStorage.setItem("accessToken", accessToken)
-          // Retry original request with new token
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`
-          return api(originalRequest)
+
+          const { accessToken, refreshToken: newRefreshToken } = response.data.data
+
+          if (accessToken && isValidJWT(accessToken)) {
+            localStorage.setItem("accessToken", accessToken)
+            if (newRefreshToken && isValidJWT(newRefreshToken)) {
+              localStorage.setItem("refreshToken", newRefreshToken)
+            }
+
+            // Retry original request with new token
+            originalRequest.headers.Authorization = `Bearer ${accessToken}`
+            return api(originalRequest)
+          } else {
+            throw new Error("Invalid token received from refresh")
+          }
+        } else {
+          throw new Error("Invalid refresh token")
         }
       } catch (refreshError) {
-        console.error("Token refresh failed:", refreshError)
-        // Refresh failed, redirect to login
+        console.error("Token refresh failed:", refreshError.message)
+        // Clear invalid tokens
         localStorage.removeItem("accessToken")
         localStorage.removeItem("refreshToken")
-        window.location.href = "/login"
+
+        // Only redirect if we're not already on login page
+        if (!window.location.pathname.includes("/login")) {
+          window.location.href = "/login"
+        }
         return Promise.reject(refreshError)
       }
     }

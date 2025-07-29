@@ -41,7 +41,6 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
-
       try {
         const refreshToken = localStorage.getItem("refreshToken")
         if (refreshToken) {
@@ -50,10 +49,8 @@ api.interceptors.response.use(
             { refreshToken },
             { withCredentials: true },
           )
-
           const { accessToken } = response.data.data
           localStorage.setItem("accessToken", accessToken)
-
           // Retry original request with new token
           originalRequest.headers.Authorization = `Bearer ${accessToken}`
           return api(originalRequest)
@@ -88,11 +85,16 @@ export const authAPI = {
 
 // Prediction API endpoints
 export const predictionAPI = {
-  predict: (data) => api.post("/api/v1/predictions/predict", data),
-  savePrediction: (data) => api.post("/api/v1/predictions/save", data),
-  getUserPredictions: () => api.get("/api/v1/predictions/user"),
-  deletePrediction: (id) => api.delete(`/api/v1/predictions/${id}`),
+  // Save prediction (create)
+  savePrediction: (data) => api.post("/api/v1/predictions", data),
+  // Get user predictions
+  getUserPredictions: (params = {}) => api.get("/api/v1/predictions", { params }),
+  // Get single prediction
   getPredictionById: (id) => api.get(`/api/v1/predictions/${id}`),
+  // Delete prediction
+  deletePrediction: (id) => api.delete(`/api/v1/predictions/${id}`),
+  // Get prediction statistics
+  getPredictionStats: () => api.get("/api/v1/predictions/stats"),
 }
 
 export default api

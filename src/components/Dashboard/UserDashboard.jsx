@@ -1,10 +1,24 @@
+"use client"
+
+import { useEffect } from "react"
 import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
+import { useDispatch, useSelector } from "react-redux"
 import { Activity, Heart, Stethoscope, TrendingUp, Plus, Calendar, FileText, Settings, User } from "lucide-react"
-import { useAuth } from "../../hooks/useAuth"
+import { fetchUserPredictions, fetchPredictionStats } from "../../store/slices/predictionSlice"
 
 const UserDashboard = () => {
-  const { user } = useAuth()
+  const dispatch = useDispatch()
+  const { user } = useSelector((state) => state.auth)
+  const { predictions, stats, isLoading } = useSelector((state) => state.predictions)
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchPredictionStats())
+      dispatch(fetchUserPredictions({ limit: 5 })) // Get last 5 predictions
+    }
+  }, [dispatch, user])
 
   const quickActions = [
     {
@@ -37,20 +51,15 @@ const UserDashboard = () => {
     },
   ]
 
-  const recentAnalyses = [
-    {
-      date: "2024-01-15",
-      symptoms: ["headache", "fever", "fatigue"],
-      result: "Common Cold",
-      risk: "Low",
-    },
-    {
-      date: "2024-01-10",
-      symptoms: ["chest_pain", "shortness_of_breath"],
-      result: "Anxiety",
-      risk: "Medium",
-    },
-  ]
+  // Format recent predictions for display
+  const recentAnalyses = predictions.slice(0, 3).map((prediction) => ({
+    id: prediction._id,
+    date: new Date(prediction.timestamp).toLocaleDateString(),
+    symptoms: prediction.symptoms,
+    result: prediction.result.prediction,
+    risk: prediction.result.riskLevel,
+    confidence: prediction.result.confidence,
+  }))
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 pt-20 pb-12">
@@ -113,7 +122,7 @@ const UserDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-300 text-sm">Total Analyses</p>
-                  <p className="text-2xl font-bold text-cyan-400">12</p>
+                  <p className="text-2xl font-bold text-cyan-400">{isLoading ? "..." : stats.totalPredictions || 0}</p>
                 </div>
                 <Activity className="w-8 h-8 text-cyan-400" />
               </div>
@@ -122,7 +131,9 @@ const UserDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-300 text-sm">This Month</p>
-                  <p className="text-2xl font-bold text-green-400">3</p>
+                  <p className="text-2xl font-bold text-green-400">
+                    {isLoading ? "..." : stats.thisMonthPredictions || 0}
+                  </p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-green-400" />
               </div>
@@ -130,8 +141,10 @@ const UserDashboard = () => {
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-sm">Avg Risk Score</p>
-                  <p className="text-2xl font-bold text-yellow-400">2.4/10</p>
+                  <p className="text-gray-300 text-sm">Avg Confidence</p>
+                  <p className="text-2xl font-bold text-yellow-400">
+                    {isLoading ? "..." : `${stats.avgConfidence || 0}%`}
+                  </p>
                 </div>
                 <Heart className="w-8 h-8 text-yellow-400" />
               </div>
@@ -148,10 +161,15 @@ const UserDashboard = () => {
             </Link>
           </div>
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden">
-            {recentAnalyses.length > 0 ? (
+            {isLoading ? (
+              <div className="p-12 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400 mx-auto mb-4"></div>
+                <p className="text-gray-300">Loading your health data...</p>
+              </div>
+            ) : recentAnalyses.length > 0 ? (
               <div className="divide-y divide-white/10">
                 {recentAnalyses.map((analysis, index) => (
-                  <div key={index} className="p-6">
+                  <div key={analysis.id || index} className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-4 mb-2">
@@ -167,9 +185,23 @@ const UserDashboard = () => {
                           >
                             {analysis.risk} Risk
                           </span>
+                          {analysis.confidence && (
+                            <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">
+                              {(analysis.confidence * 100).toFixed(0)}% confidence
+                            </span>
+                          )}
                         </div>
-                        <h3 className="text-white font-semibold mb-1">{analysis.result}</h3>
-                        <p className="text-gray-300 text-sm">Symptoms: {analysis.symptoms.join(", ")}</p>
+                        <h3 className="text-white font-semibold mb-1 capitalize">
+                          {analysis.result.replace(/_/g, " ")}
+                        </h3>
+                        <p className="text-gray-300 text-sm">
+                          Symptoms:{" "}
+                          {analysis.symptoms
+                            .slice(0, 3)
+                            .map((s) => s.replace(/_/g, " "))
+                            .join(", ")}
+                          {analysis.symptoms.length > 3 && ` +${analysis.symptoms.length - 3} more`}
+                        </p>
                       </div>
                       <Stethoscope className="w-6 h-6 text-cyan-400" />
                     </div>

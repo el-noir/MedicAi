@@ -1,268 +1,25 @@
-// import React, { useEffect } from 'react';
-// import { motion } from 'framer-motion';
-// import { ChevronDown, X, AlertCircle, CheckCircle, Shield, Clock } from 'lucide-react';
-// import { usePrediction } from '../hooks/usePrediction.jsx';
+"use client"
 
-// const Predict = () => {
-//   const {
-//     symptoms,
-//     inputValue,
-//     predictions,
-//     isLoading,
-//     error,
-//     availableSymptoms,
-//     addSymptom,
-//     removeSymptom,
-//     handleInputChange,
-//     handleKeyDown,
-//     predictDisease,
-//     resetPrediction,
-//   } = usePrediction();
-
-//   // Debugging effects
-//   useEffect(() => {
-//     console.log("Current Symptoms State:", symptoms);
-//   }, [symptoms]);
-
-//   useEffect(() => {
-//     console.log("Input Value State:", inputValue);
-//   }, [inputValue]);
-
-//   useEffect(() => {
-//     console.log("Predictions State:", predictions);
-//   }, [predictions]);
-
-//   const handleAnalyzeClick = async (e) => {
-//     e.preventDefault();
-//     e.stopPropagation();
-    
-//     console.log('Analyze button clicked with symptoms:', symptoms);
-    
-//     if (symptoms.length === 0) {
-//       console.error('No symptoms to analyze');
-//       return;
-//     }
-
-//     try {
-//       await predictDisease();
-//     } catch (err) {
-//       console.error('Prediction failed:', err);
-//     }
-//   };
-
-//   const handleSymptomAdd = (e) => {
-//     e.preventDefault();
-//     if (inputValue.trim()) {
-//       addSymptom(inputValue.trim());
-//     }
-//   };
-
-//   return (
-//     <div className='min-w-full w-full'>
-//       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 w-full">
-//         <div className="max-w-7xl mx-auto">
-//           <motion.div
-//             initial={{ opacity: 0, y: 20 }}
-//             animate={{ opacity: 1, y: 0 }}
-//             transition={{ duration: 0.5 }}
-//             className="text-center mb-16"
-//           >
-//             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent leading-tight">
-//               Symptom <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Analysis</span>
-//             </h1>
-//             <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed">
-//               Enter your symptoms below to get an AI-powered preliminary diagnosis
-//             </p>
-//           </motion.div>
-
-//           <div className="max-w-3xl mx-auto">
-//             {/* Symptom Input */}
-//             <form onSubmit={handleSymptomAdd}>
-//               <motion.div
-//                 initial={{ opacity: 0, y: 20 }}
-//                 animate={{ opacity: 1, y: 0 }}
-//                 transition={{ duration: 0.5, delay: 0.2 }}
-//                 className="mb-12"
-//               >
-//                 <div className="relative">
-//                   <input
-//                     type="text"
-//                     value={inputValue}
-//                     onChange={handleInputChange}
-//                     onKeyDown={(e) => {
-//                       if (e.key === 'Enter') {
-//                         handleSymptomAdd(e);
-//                       }
-//                     }}
-//                     placeholder="Type a symptom and press Enter..."
-//                     className="w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-6 py-4 text-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
-//                     list="symptoms-list"
-//                   />
-//                   <datalist id="symptoms-list">
-//                     {availableSymptoms.map((symptom) => (
-//                       <option key={symptom} value={symptom} />
-//                     ))}
-//                   </datalist>
-//                 </div>
-
-//                 {/* Selected Symptoms */}
-//                 <div className="flex flex-wrap gap-2 mt-4">
-//                   {symptoms.map((symptom) => (
-//                     <motion.div
-//                       key={symptom}
-//                       initial={{ scale: 0.8, opacity: 0 }}
-//                       animate={{ scale: 1, opacity: 1 }}
-//                       className="bg-cyan-500/20 border border-cyan-400/50 rounded-full px-4 py-2 flex items-center"
-//                     >
-//                       <span className="mr-2 capitalize">{symptom}</span>
-//                       <button
-//                         type="button"
-//                         onClick={() => removeSymptom(symptom)}
-//                         className="text-cyan-300 hover:text-white"
-//                       >
-//                         <X className="w-4 h-4" />
-//                       </button>
-//                     </motion.div>
-//                   ))}
-//                 </div>
-//               </motion.div>
-//             </form>
-
-//             {/* Action Buttons */}
-//             <motion.div
-//               initial={{ opacity: 0, y: 20 }}
-//               animate={{ opacity: 1, y: 0 }}
-//               transition={{ duration: 0.5, delay: 0.3 }}
-//               className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
-//             >
-//               <button
-//                 onClick={handleAnalyzeClick}
-//                 disabled={isLoading || symptoms.length === 0}
-//                 className={`group bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center ${
-//                   isLoading || symptoms.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
-//                 }`}
-//               >
-//                 {isLoading ? (
-//                   <>
-//                     <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-//                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-//                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-//                     </svg>
-//                     Analyzing...
-//                   </>
-//                 ) : (
-//                   <>
-//                     Analyze Symptoms
-//                     <ChevronDown className="w-5 h-5 ml-2 group-hover:translate-y-1 transition-transform" />
-//                   </>
-//                 )}
-//               </button>
-
-//               <button
-//                 type="button"
-//                 onClick={resetPrediction}
-//                 className="group bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center"
-//               >
-//                 Reset
-//               </button>
-//             </motion.div>
-
-//             {/* Error Message */}
-//             {error && (
-//               <motion.div
-//                 initial={{ opacity: 0, y: 20 }}
-//                 animate={{ opacity: 1, y: 0 }}
-//                 className="bg-red-500/20 border border-red-400/50 rounded-xl p-4 mb-8 flex items-start"
-//               >
-//                 <AlertCircle className="w-5 h-5 mr-2 mt-0.5 text-red-400" />
-//                 <span>{error}</span>
-//               </motion.div>
-//             )}
-
-//             {/* Results */}
-//             {predictions && (
-//               <motion.div
-//                 initial={{ opacity: 0, y: 20 }}
-//                 animate={{ opacity: 1, y: 0 }}
-//                 className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10"
-//               >
-//                 <div className="mb-8">
-//                   <h2 className="text-2xl md:text-3xl font-bold mb-4 text-cyan-400">
-//                     Analysis Results
-//                   </h2>
-//                   <div className="flex items-center space-x-6 text-sm text-gray-400 mb-6">
-//                     <div className="flex items-center">
-//                       <Clock className="w-4 h-4 mr-2 text-purple-400" />
-//                       {new Date().toLocaleString()}
-//                     </div>
-//                     <div className="flex items-center">
-//                       <Shield className="w-4 h-4 mr-2 text-blue-400" />
-//                       {predictions.emergency ? 'Emergency - Seek help!' : 'Non-emergency'}
-//                     </div>
-//                   </div>
-
-//                   <div className="mb-6">
-//                     <h3 className="text-lg font-semibold mb-2">Your Symptoms:</h3>
-//                     <div className="flex flex-wrap gap-2">
-//                       {predictions.matched_symptoms.map((symptom) => (
-//                         <span key={symptom} className="bg-cyan-500/20 border border-cyan-400/50 rounded-full px-3 py-1 text-sm capitalize">
-//                           {symptom}
-//                         </span>
-//                       ))}
-//                     </div>
-//                   </div>
-//                 </div>
-
-//                 {/* Predictions */}
-//                 <div className="space-y-6">
-//                   <h3 className="text-xl font-bold mb-4">Possible Conditions:</h3>
-//                   {predictions.predictions.map((prediction, index) => (
-//                     <motion.div
-//                       key={index}
-//                       initial={{ opacity: 0, y: 20 }}
-//                       animate={{ opacity: 1, y: 0 }}
-//                       transition={{ delay: index * 0.1 }}
-//                       className="bg-white/5 rounded-xl p-6 border border-white/10"
-//                     >
-//                       <div className="flex justify-between items-start mb-3">
-//                         <h4 className="text-lg font-semibold text-cyan-300 capitalize">
-//                           {prediction.disease}
-//                         </h4>
-//                         <span className="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-sm">
-//                           {(prediction.confidence * 100).toFixed(1)}% confidence
-//                         </span>
-//                       </div>
-
-//                       <p className="text-gray-300 mb-4">{prediction.description}</p>
-
-//                       <div className="mb-4">
-//                         <h5 className="font-medium mb-2">Recommended Precautions:</h5>
-//                         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-//                           {prediction.precautions.map((precaution, i) => (
-//                             <li key={i} className="flex items-start">
-//                               <CheckCircle className="w-4 h-4 mr-2 mt-0.5 text-green-400 flex-shrink-0" />
-//                               <span className="capitalize">{precaution}</span>
-//                             </li>
-//                           ))}
-//                         </ul>
-//                       </div>
-//                     </motion.div>
-//                   ))}
-//                 </div>
-//               </motion.div>
-//             )}
-//           </div>
-//         </div>
-//       </section>
-//     </div>
-//   );
-// };
-
-// export default Predict;
-
-import React, { useState, useEffect, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, AlertCircle, CheckCircle, Shield, Clock, Search, Plus, Trash2, Download, Share2, AlertTriangle, Heart, Brain, Stethoscope, Activity, ChevronDown } from 'lucide-react'
+import { useState, useEffect, useMemo } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import {
+  X,
+  AlertCircle,
+  CheckCircle,
+  Shield,
+  Clock,
+  Search,
+  Plus,
+  Trash2,
+  Download,
+  Share2,
+  AlertTriangle,
+  Heart,
+  Brain,
+  Stethoscope,
+  Activity,
+} from "lucide-react"
+import { usePredictionWithSave } from "../hooks/usePrediction"
 
 // Symptom categories for better organization
 const SYMPTOM_CATEGORIES = {
@@ -277,38 +34,27 @@ const SYMPTOM_CATEGORIES = {
 }
 
 const Predict = () => {
-  // State management
-  const [symptoms, setSymptoms] = useState([])
-  const [inputValue, setInputValue] = useState("")
+  // Use the custom hook
+  const {
+    symptoms,
+    inputValue,
+    predictions,
+    isLoading,
+    error,
+    availableSymptoms,
+    addSymptom,
+    removeSymptom,
+    handleInputChange,
+    handleKeyDown,
+    predictDisease,
+    resetPrediction,
+    isSaving,
+  } = usePredictionWithSave()
+
+  // Local state for UI
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
-  const [predictions, setPredictions] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [availableSymptoms, setAvailableSymptoms] = useState([])
   const [symptomCategories, setSymptomCategories] = useState({})
-
-  // Fetch symptoms on component mount
-  useEffect(() => {
-    fetchSymptoms()
-  }, [])
-
-  const fetchSymptoms = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/symptoms")
-      if (!response.ok) throw new Error("Failed to fetch symptoms")
-      const data = await response.json()
-      setAvailableSymptoms(data.symptoms || data)
-      if (data.categories) {
-        setSymptomCategories(data.categories)
-      } else {
-        categorizeSymptoms(data.symptoms || data)
-      }
-    } catch (err) {
-      console.error("Failed to fetch symptoms:", err)
-      setError("Failed to load symptoms list")
-    }
-  }
 
   // Categorize symptoms based on keywords
   const categorizeSymptoms = (symptoms) => {
@@ -342,6 +88,13 @@ const Predict = () => {
     setSymptomCategories(categorized)
   }
 
+  // Categorize symptoms when available symptoms change
+  useEffect(() => {
+    if (availableSymptoms.length > 0) {
+      categorizeSymptoms(availableSymptoms)
+    }
+  }, [availableSymptoms])
+
   // Filter symptoms based on search and category
   const filteredSymptoms = useMemo(() => {
     let filtered = availableSymptoms
@@ -357,60 +110,9 @@ const Predict = () => {
     return filtered.filter((symptom) => !symptoms.includes(symptom))
   }, [availableSymptoms, searchTerm, selectedCategory, symptoms, symptomCategories])
 
-  // Add symptom
-  const addSymptom = (symptom) => {
-    const normalizedSymptom = symptom.trim().toLowerCase()
-    if (normalizedSymptom && !symptoms.includes(normalizedSymptom)) {
-      setSymptoms((prev) => [...prev, normalizedSymptom])
-      setInputValue("")
-      setSearchTerm("")
-    }
-  }
-
-  // Remove symptom
-  const removeSymptom = (symptomToRemove) => {
-    setSymptoms((prev) => prev.filter((symptom) => symptom !== symptomToRemove))
-  }
-
   // Clear all symptoms
   const clearAllSymptoms = () => {
-    setSymptoms([])
-    setPredictions(null)
-    setError(null)
-  }
-
-  // Predict disease
-  const predictDisease = async () => {
-    if (symptoms.length === 0) {
-      setError("Please add at least one symptom")
-      return
-    }
-
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const response = await fetch("http://localhost:5000/api/predict", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ symptoms }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || `Prediction failed with status ${response.status}`)
-      }
-
-      const data = await response.json()
-      setPredictions(data)
-    } catch (err) {
-      console.error("Prediction error:", err)
-      setError(err.message || "Failed to get prediction")
-    } finally {
-      setIsLoading(false)
-    }
+    resetPrediction()
   }
 
   // Export results
@@ -458,7 +160,8 @@ const Predict = () => {
               <div className="flex items-center">
                 <AlertTriangle className="h-4 w-4 text-yellow-500 mr-2" />
                 <span className="text-yellow-200 text-sm">
-                  This tool provides preliminary analysis only. Always consult healthcare professionals for medical advice.
+                  This tool provides preliminary analysis only. Always consult healthcare professionals for medical
+                  advice.
                 </span>
               </div>
             </div>
@@ -487,7 +190,6 @@ const Predict = () => {
                         className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                       />
                     </div>
-
                     {/* Category Tabs */}
                     <div className="flex flex-wrap gap-2">
                       <button
@@ -521,13 +223,8 @@ const Predict = () => {
                     <input
                       type="text"
                       value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && inputValue.trim()) {
-                          e.preventDefault()
-                          addSymptom(inputValue.trim())
-                        }
-                      }}
+                      onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
                       placeholder="Type a symptom and press Enter..."
                       className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                     />
@@ -568,9 +265,7 @@ const Predict = () => {
             <div className="space-y-6">
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl">
                 <div className="p-4 border-b border-white/10 flex items-center justify-between">
-                  <h3 className="text-xl text-cyan-400 font-semibold">
-                    Selected Symptoms ({symptoms.length})
-                  </h3>
+                  <h3 className="text-xl text-cyan-400 font-semibold">Selected Symptoms ({symptoms.length})</h3>
                   {symptoms.length > 0 && (
                     <button
                       onClick={clearAllSymptoms}
@@ -615,7 +310,7 @@ const Predict = () => {
                   {isLoading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Analyzing...
+                      {isSaving ? "Saving..." : "Analyzing..."}
                     </>
                   ) : (
                     <>
@@ -668,6 +363,9 @@ const Predict = () => {
                     <h2 className="text-2xl text-cyan-400 flex items-center gap-2 font-semibold">
                       <CheckCircle className="w-6 h-6" />
                       Analysis Results
+                      {isSaving && (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-cyan-400 ml-2"></div>
+                      )}
                     </h2>
                     <div className="flex items-center gap-4 text-sm text-gray-400">
                       <div className="flex items-center gap-1">
@@ -720,10 +418,7 @@ const Predict = () => {
                       <h3 className="text-lg font-semibold mb-3 text-white">Analyzed Symptoms</h3>
                       <div className="flex flex-wrap gap-2">
                         {predictions.matched_symptoms?.map((symptom) => (
-                          <span
-                            key={symptom}
-                            className="px-3 py-1 bg-cyan-500/20 text-cyan-300 rounded-full text-sm"
-                          >
+                          <span key={symptom} className="px-3 py-1 bg-cyan-500/20 text-cyan-300 rounded-full text-sm">
                             {symptom.replace(/_/g, " ")}
                           </span>
                         ))}
@@ -757,9 +452,7 @@ const Predict = () => {
                                 )}
                               </div>
                             </div>
-
                             <p className="text-gray-300 mb-4 leading-relaxed">{prediction.description}</p>
-
                             {prediction.critical_symptoms?.length > 0 && (
                               <div className="mb-4">
                                 <h5 className="font-medium mb-2 text-red-400">Critical Symptoms Present:</h5>
@@ -772,7 +465,6 @@ const Predict = () => {
                                 </div>
                               </div>
                             )}
-
                             <div>
                               <h5 className="font-medium mb-2 text-white">Recommended Precautions:</h5>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">

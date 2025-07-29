@@ -1,8 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { savePrediction } from "../store/slices/predictionSlice"
 
-export const usePrediction = () => {
+export const usePredictionWithSave = () => {
+  const dispatch = useDispatch()
+  const { user, isAuthenticated } = useSelector((state) => state.auth)
+  const { isSaving } = useSelector((state) => state.predictions)
+
   const [symptoms, setSymptoms] = useState([])
   const [inputValue, setInputValue] = useState("")
   const [predictions, setPredictions] = useState(null)
@@ -35,6 +41,7 @@ export const usePrediction = () => {
     setError(null)
 
     try {
+      // Make prediction request to Flask API
       const response = await fetch("http://localhost:5000/api/predict", {
         method: "POST",
         headers: {
@@ -50,6 +57,33 @@ export const usePrediction = () => {
 
       const data = await response.json()
       setPredictions(data)
+
+      // Save prediction to database if user is authenticated
+      if (isAuthenticated && user) {
+        try {
+          const predictionData = {
+            symptoms,
+            result: {
+              prediction: data.predictions?.[0]?.disease || "Unknown",
+              confidence: data.predictions?.[0]?.confidence || 0,
+              recommendations: data.predictions?.[0]?.precautions || [],
+              riskLevel: data.overall_risk_score >= 7 ? "High" : data.overall_risk_score >= 4 ? "Medium" : "Low",
+            },
+            flaskResponse: data,
+            additionalInfo: {
+              emergency: data.emergency,
+              riskScore: data.overall_risk_score,
+              matchedSymptoms: data.matched_symptoms,
+            },
+          }
+
+          await dispatch(savePrediction(predictionData)).unwrap()
+          console.log("Prediction saved successfully!")
+        } catch (saveError) {
+          console.error("Failed to save prediction:", saveError)
+          // Don't show error to user as prediction still worked
+        }
+      }
     } catch (err) {
       console.error("Prediction error:", err)
       setError(err.message || "Failed to get prediction")
@@ -91,7 +125,7 @@ export const usePrediction = () => {
     symptoms,
     inputValue,
     predictions,
-    isLoading,
+    isLoading: isLoading || isSaving,
     error,
     availableSymptoms,
     addSymptom,
@@ -100,5 +134,6 @@ export const usePrediction = () => {
     handleKeyDown,
     predictDisease,
     resetPrediction,
+    isSaving,
   }
 }

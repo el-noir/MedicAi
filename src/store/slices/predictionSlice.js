@@ -1,40 +1,24 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
-import { predictionAPI } from "../../services/api"
+import { predictionAPI } from "../../services/api.js"
 
 // Async thunks
-export const submitPrediction = createAsyncThunk(
-  "predictions/submitPrediction",
-  async (predictionData, { rejectWithValue, getState }) => {
+export const savePrediction = createAsyncThunk(
+  "predictions/savePrediction",
+  async (predictionData, { rejectWithValue }) => {
     try {
-      const { auth } = getState()
-      const response = await predictionAPI.predict(predictionData)
-
-      // If user is authenticated, save the prediction
-      if (auth.isAuthenticated) {
-        await predictionAPI.savePrediction({
-          ...predictionData,
-          result: response.data,
-          timestamp: new Date().toISOString(),
-        })
-      }
-
-      return {
-        ...response.data,
-        id: Date.now().toString(),
-        timestamp: new Date().toISOString(),
-        symptoms: predictionData.symptoms,
-      }
+      const response = await predictionAPI.savePrediction(predictionData)
+      return response.data.data
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Prediction failed")
+      return rejectWithValue(error.response?.data?.message || "Failed to save prediction")
     }
   },
 )
 
 export const fetchUserPredictions = createAsyncThunk(
   "predictions/fetchUserPredictions",
-  async (_, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue }) => {
     try {
-      const response = await predictionAPI.getUserPredictions()
+      const response = await predictionAPI.getUserPredictions(params)
       return response.data.data
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || "Failed to fetch predictions")
@@ -54,13 +38,36 @@ export const deletePrediction = createAsyncThunk(
   },
 )
 
+export const fetchPredictionStats = createAsyncThunk(
+  "predictions/fetchPredictionStats",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await predictionAPI.getPredictionStats()
+      return response.data.data
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch prediction stats")
+    }
+  },
+)
+
 const initialState = {
   predictions: [],
   currentPrediction: null,
+  stats: {
+    totalPredictions: 0,
+    thisMonthPredictions: 0,
+    avgConfidence: 0,
+    riskDistribution: [],
+  },
+  pagination: {
+    currentPage: 1,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPrevPage: false,
+  },
   isLoading: false,
+  isSaving: false,
   error: null,
-  totalPredictions: 0,
-  recentPredictions: [],
 }
 
 const predictionSlice = createSlice({
@@ -73,53 +80,79 @@ const predictionSlice = createSlice({
     clearCurrentPrediction: (state) => {
       state.currentPrediction = null
     },
-    setCurrentPrediction: (state, action) => {
-      state.currentPrediction = action.payload
+    resetPredictions: (state) => {
+      state.predictions = []
+      state.currentPrediction = null
+      state.error = null
     },
   },
   extraReducers: (builder) => {
     builder
-      // Submit Prediction
-      .addCase(submitPrediction.pending, (state) => {
-        state.isLoading = true
+      // Save prediction
+      .addCase(savePrediction.pending, (state) => {
+        state.isSaving = true
         state.error = null
       })
-      .addCase(submitPrediction.fulfilled, (state, action) => {
-        state.isLoading = false
+      .addCase(savePrediction.fulfilled, (state, action) => {
+        state.isSaving = false
         state.currentPrediction = action.payload
         state.predictions.unshift(action.payload)
-        state.recentPredictions = state.predictions.slice(0, 5)
-        state.totalPredictions = state.predictions.length
-        state.error = null
+        state.stats.totalPredictions += 1
       })
-      .addCase(submitPrediction.rejected, (state, action) => {
-        state.isLoading = false
+      .addCase(savePrediction.rejected, (state, action) => {
+        state.isSaving = false
         state.error = action.payload
       })
-      // Fetch User Predictions
+
+      // Fetch user predictions
       .addCase(fetchUserPredictions.pending, (state) => {
         state.isLoading = true
         state.error = null
       })
       .addCase(fetchUserPredictions.fulfilled, (state, action) => {
         state.isLoading = false
-        state.predictions = action.payload
-        state.recentPredictions = action.payload.slice(0, 5)
-        state.totalPredictions = action.payload.length
-        state.error = null
+        state.predictions = action.payload.predictions
+        state.pagination = {
+          currentPage: action.payload.currentPage,
+          totalPages: action.payload.totalPages,
+          hasNextPage: action.payload.hasNextPage,
+          hasPrevPage: action.payload.hasPrevPage,
+        }
+        state.stats.totalPredictions = action.payload.totalPredictions
       })
       .addCase(fetchUserPredictions.rejected, (state, action) => {
         state.isLoading = false
         state.error = action.payload
       })
-      // Delete Prediction
+
+      // Delete prediction
+      .addCase(deletePrediction.pending, (state) => {
+        state.isLoading = true
+      })
       .addCase(deletePrediction.fulfilled, (state, action) => {
-        state.predictions = state.predictions.filter((p) => p.id !== action.payload)
-        state.recentPredictions = state.predictions.slice(0, 5)
-        state.totalPredictions = state.predictions.length
+        state.isLoading = false
+        state.predictions = state.predictions.filter((prediction) => prediction._id !== action.payload)
+        state.stats.totalPredictions = Math.max(0, state.stats.totalPredictions - 1)
+      })
+      .addCase(deletePrediction.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload
+      })
+
+      // Fetch prediction stats
+      .addCase(fetchPredictionStats.pending, (state) => {
+        state.isLoading = true
+      })
+      .addCase(fetchPredictionStats.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.stats = action.payload
+      })
+      .addCase(fetchPredictionStats.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload
       })
   },
 })
 
-export const { clearError, clearCurrentPrediction, setCurrentPrediction } = predictionSlice.actions
+export const { clearError, clearCurrentPrediction, resetPredictions } = predictionSlice.actions
 export default predictionSlice.reducer

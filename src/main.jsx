@@ -88,7 +88,7 @@
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
 import "./App.css"
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom"
+import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider, Navigate } from "react-router-dom"
 import { Provider } from "react-redux"
 import { store } from "./store/stores.js"
 import Layout from "./Layout.jsx"

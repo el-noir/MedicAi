@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -84,7 +82,6 @@ const Predict = () => {
         categorized.other.push(symptom)
       }
     })
-
     setSymptomCategories(categorized)
   }
 
@@ -177,6 +174,7 @@ const Predict = () => {
                     Symptom Selection
                   </h2>
                 </div>
+
                 <div className="p-6 space-y-6">
                   {/* Search and Filter */}
                   <div className="space-y-4">
@@ -190,6 +188,7 @@ const Predict = () => {
                         className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                       />
                     </div>
+
                     {/* Category Tabs */}
                     <div className="flex flex-wrap gap-2">
                       <button
@@ -383,6 +382,7 @@ const Predict = () => {
                     </div>
                   </div>
                 </div>
+
                 <div className="p-6 space-y-6">
                   {/* Emergency Alert */}
                   {predictions.emergency && (

@@ -1,9 +1,10 @@
 import axios from "axios"
-import conf from "../conf/conf"
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1"
 
 // Create axios instance with proper CORS configuration
 const api = axios.create({
-  baseURL: conf.backendUrl,
+  baseURL: API_BASE_URL,
   withCredentials: true,
   timeout: 15000,
   headers: {
@@ -28,14 +29,9 @@ const isValidJWT = (token) => {
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = cleanToken(localStorage.getItem("accessToken"))
+    const token = localStorage.getItem("accessToken")
     if (token) {
-      if (isValidJWT(token)) {
-        config.headers.Authorization = `Bearer ${token}`
-      } else {
-        console.warn("Token format seems invalid, but attempting to use it anyway")
-        config.headers.Authorization = `Bearer ${token}`
-      }
+      config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },
@@ -57,102 +53,116 @@ api.interceptors.response.use(
       return Promise.reject(new Error("Network error. Please check your connection."))
     }
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true
-
-      try {
-        const refreshToken = cleanToken(localStorage.getItem("refreshToken"))
-
-        if (refreshToken && isValidJWT(refreshToken)) {
-          console.log("Attempting token refresh...")
-          const response = await axios.post(
-            `${conf.backendUrl}/api/v1/users/refresh-token`,
-            { refreshToken },
-            {
-              withCredentials: true,
-              headers: {
-                "Content-Type": "application/json",
-              },
-            },
-          )
-
-          const { accessToken, refreshToken: newRefreshToken } = response.data.data
-
-          if (accessToken && isValidJWT(accessToken)) {
-            localStorage.setItem("accessToken", accessToken)
-            if (newRefreshToken && isValidJWT(newRefreshToken)) {
-              localStorage.setItem("refreshToken", newRefreshToken)
-            }
-
-            // Retry original request with new token
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`
-            return api(originalRequest)
-          } else {
-            throw new Error("Invalid token received from refresh")
-          }
-        } else {
-          throw new Error("Invalid refresh token")
-        }
-      } catch (refreshError) {
-        console.error("Token refresh failed:", refreshError.message)
-        // Clear invalid tokens
-        localStorage.removeItem("accessToken")
-        localStorage.removeItem("refreshToken")
-
-        // Only redirect if we're not already on login page
-        if (!window.location.pathname.includes("/login")) {
-          window.location.href = "/login"
-        }
-        return Promise.reject(refreshError)
-      }
+    if (error.response?.status === 401) {
+      localStorage.removeItem("accessToken")
+      localStorage.removeItem("refreshToken")
+      window.location.href = "/login"
     }
-
     return Promise.reject(error)
   },
 )
 
 // Auth API endpoints
 export const authAPI = {
-  register: (userData) => api.post("/api/v1/users/register", userData),
-  login: (credentials) => api.post("/api/v1/users/login", credentials),
-  logout: () => api.post("/api/v1/users/logout"),
-  verifyOTP: (data) => api.post("/api/v1/users/verify-otp", data),
-  resendOTP: (data) => api.post("/api/v1/users/resend-otp", data),
-  getCurrentUser: () => api.get("/api/v1/users/me"),
-  forgotPassword: (email) => api.post("/api/v1/users/forgot-password", { email }),
-  resetPassword: (token, password) => api.post(`/api/v1/users/reset-password/${token}`, { password }),
-  refreshToken: (refreshToken) => api.post("/api/v1/users/refresh-token", { refreshToken }),
-  updateProfile: (data) => api.put("/api/v1/users/profile", data),
+  register: async (userData) => {
+    const response = await api.post("/users/register", userData)
+    return response.data
+  },
+
+  login: async (credentials) => {
+    const response = await api.post("/users/login", credentials)
+    return response.data
+  },
+
+  logout: async () => {
+    const response = await api.post("/users/logout")
+    return response.data
+  },
+
+  verifyOTP: (data) => api.post("/users/verify-otp", data),
+  resendOTP: (data) => api.post("/users/resend-otp", data),
+  getCurrentUser: async () => {
+    const response = await api.get("/users/current-user")
+    return response.data
+  },
+  forgotPassword: (email) => api.post("/users/forgot-password", { email }),
+  resetPassword: (token, password) => api.post(`/users/reset-password/${token}`, { password }),
+  refreshToken: async () => {
+    const response = await api.post("/users/refresh-token")
+    return response.data
+  },
+  updateProfile: async (userData) => {
+    const response = await api.patch("/users/update-account", userData)
+    return response.data
+  },
+
+  changePassword: async (passwordData) => {
+    const response = await api.post("/users/change-password", passwordData)
+    return response.data
+  },
 }
 
 // Prediction API endpoints
 export const predictionAPI = {
   // Save prediction (create)
-  savePrediction: (data) => api.post("/api/v1/predictions", data),
+  savePrediction: async (predictionData) => {
+    const response = await api.post("/predictions", predictionData)
+    return response.data
+  },
   // Get user predictions
-  getUserPredictions: (params = {}) => api.get("/api/v1/predictions", { params }),
+  getUserPredictions: async (params = {}) => {
+    const response = await api.get("/predictions", { params })
+    return response.data
+  },
   // Get single prediction
-  getPredictionById: (id) => api.get(`/api/v1/predictions/${id}`),
+  getPredictionById: async (predictionId) => {
+    const response = await api.get(`/predictions/${predictionId}`)
+    return response.data
+  },
   // Delete prediction
-  deletePrediction: (id) => api.delete(`/api/v1/predictions/${id}`),
+  deletePrediction: async (predictionId) => {
+    const response = await api.delete(`/predictions/${predictionId}`)
+    return response.data
+  },
   // Get prediction statistics
-  getPredictionStats: () => api.get("/api/v1/predictions/stats"),
+  getPredictionStats: async () => {
+    const response = await api.get("/predictions/stats")
+    return response.data
+  },
 }
 
 // Shared Prediction API endpoints
 export const sharedPredictionAPI = {
   // Share prediction with doctor
-  sharePrediction: (data) => api.post("/api/v1/shared-predictions/share", data),
+  sharePrediction: async (shareData) => {
+    const response = await api.post("/shared-predictions/share", shareData)
+    return response.data
+  },
   // Get user's shared predictions
-  getUserSharedPredictions: (params = {}) => api.get("/api/v1/shared-predictions/my-shares", { params }),
+  getUserSharedPredictions: async (params = {}) => {
+    const response = await api.get("/shared-predictions/my-shares", { params })
+    return response.data
+  },
   // Get doctor's received predictions
-  getDoctorReceivedPredictions: (params = {}) => api.get("/api/v1/shared-predictions/received", { params }),
+  getDoctorReceivedPredictions: async (params = {}) => {
+    const response = await api.get("/shared-predictions/received", { params })
+    return response.data
+  },
   // View shared prediction (for doctors)
-  viewSharedPrediction: (shareCode) => api.get(`/api/v1/shared-predictions/view/${shareCode}`),
+  viewSharedPrediction: async (shareCode) => {
+    const response = await api.get(`/shared-predictions/view/${shareCode}`)
+    return response.data
+  },
   // Respond to shared prediction (for doctors)
-  respondToSharedPrediction: (shareCode, data) => api.post(`/api/v1/shared-predictions/respond/${shareCode}`, data),
+  respondToSharedPrediction: async (shareCode, responseData) => {
+    const response = await api.post(`/shared-predictions/respond/${shareCode}`, responseData)
+    return response.data
+  },
   // Revoke shared prediction access
-  revokeSharedPrediction: (shareId) => api.patch(`/api/v1/shared-predictions/revoke/${shareId}`),
+  revokeSharedPrediction: async (shareId) => {
+    const response = await api.patch(`/shared-predictions/revoke/${shareId}`)
+    return response.data
+  },
 }
 
 export default api

@@ -12,7 +12,6 @@ const SharePredictionModal = ({ prediction, isOpen, onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-
     if (!doctorEmail.trim()) {
       setError("Doctor's email is required")
       return
@@ -100,8 +99,8 @@ const SharePredictionModal = ({ prediction, isOpen, onClose, onSuccess }) => {
             {/* Prediction Summary */}
             <div className="bg-white/5 rounded-lg p-4 mb-6">
               <h4 className="text-white font-semibold mb-2">Analysis to Share:</h4>
-              <p className="text-cyan-400 font-medium">{prediction.result?.prediction || "Analysis"}</p>
-              <p className="text-gray-300 text-sm mt-1">{new Date(prediction.timestamp).toLocaleDateString()}</p>
+              <p className="text-cyan-400 font-medium">{prediction?.result?.prediction || "Analysis"}</p>
+              <p className="text-gray-300 text-sm mt-1">{new Date(prediction?.timestamp).toLocaleDateString()}</p>
             </div>
 
             {error && (

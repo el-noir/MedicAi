@@ -434,7 +434,6 @@ const Profile = () => {
                   </button>
                 </div>
               </div>
-
               <div className="space-y-4">
                 <div>
                   <h4 className="text-lg font-semibold text-white mb-2">Diagnosis</h4>
@@ -442,7 +441,6 @@ const Profile = () => {
                     {selectedPrediction.result?.prediction?.replace(/_/g, " ") || "N/A"}
                   </p>
                 </div>
-
                 <div>
                   <h4 className="text-lg font-semibold text-white mb-2">Symptoms</h4>
                   <div className="flex flex-wrap gap-2">
@@ -453,7 +451,6 @@ const Profile = () => {
                     ))}
                   </div>
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h4 className="text-lg font-semibold text-white mb-2">Risk Level</h4>
@@ -474,7 +471,6 @@ const Profile = () => {
                     </p>
                   </div>
                 </div>
-
                 {selectedPrediction.result?.recommendations && selectedPrediction.result.recommendations.length > 0 && (
                   <div>
                     <h4 className="text-lg font-semibold text-white mb-2">Recommendations</h4>
@@ -487,7 +483,6 @@ const Profile = () => {
                     </ul>
                   </div>
                 )}
-
                 <div>
                   <h4 className="text-lg font-semibold text-white mb-2">Analysis Date</h4>
                   <p className="text-gray-300">{formatDate(selectedPrediction.timestamp)}</p>

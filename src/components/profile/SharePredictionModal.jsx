@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { X, Share2, Mail, MessageSquare, Send, CheckCircle, AlertCircle } from "lucide-react"
@@ -39,7 +37,7 @@ const SharePredictionModal = ({ prediction, isOpen, onClose, onSuccess }) => {
       setTimeout(() => {
         onSuccess?.()
         handleClose()
-      }, 5000)
+      }, 2000)
     } catch (error) {
       setError(error.response?.data?.message || "Failed to share prediction")
     } finally {

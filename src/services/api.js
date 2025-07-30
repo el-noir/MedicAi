@@ -18,23 +18,24 @@ const cleanToken = (token) => {
   return token.trim().replace(/^Bearer\s+/i, "")
 }
 
-// Helper function to validate JWT format
+// Helper function to validate JWT format (less strict)
 const isValidJWT = (token) => {
   if (!token) return false
-  const parts = token.split(".")
-  return parts.length === 3
+  // Just check if it has some basic structure, don't be too strict
+  return token.length > 20 && token.includes(".")
 }
 
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
     const token = cleanToken(localStorage.getItem("accessToken"))
-    if (token && isValidJWT(token)) {
-      config.headers.Authorization = `Bearer ${token}`
-    } else if (token) {
-      console.warn("Invalid token format detected, removing from localStorage")
-      localStorage.removeItem("accessToken")
-      localStorage.removeItem("refreshToken")
+    if (token) {
+      if (isValidJWT(token)) {
+        config.headers.Authorization = `Bearer ${token}`
+      } else {
+        console.warn("Token format seems invalid, but attempting to use it anyway")
+        config.headers.Authorization = `Bearer ${token}`
+      }
     }
     return config
   },

@@ -1,10 +1,8 @@
 import axios from "axios"
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1"
-
+import conf from '../conf/conf.js'
 // Create axios instance with proper CORS configuration
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: conf.backendUrl,
   withCredentials: true,
   timeout: 15000,
   headers: {
@@ -65,39 +63,39 @@ api.interceptors.response.use(
 // Auth API endpoints
 export const authAPI = {
   register: async (userData) => {
-    const response = await api.post("/users/register", userData)
+    const response = await api.post("/api/v1/users/register", userData)
     return response.data
   },
 
   login: async (credentials) => {
-    const response = await api.post("/users/login", credentials)
+    const response = await api.post("/api/v1/users/login", credentials)
     return response.data
   },
 
   logout: async () => {
-    const response = await api.post("/users/logout")
+    const response = await api.post("/api/v1/users/logout")
     return response.data
   },
 
-  verifyOTP: (data) => api.post("/users/verify-otp", data),
-  resendOTP: (data) => api.post("/users/resend-otp", data),
+  verifyOTP: (data) => api.post("/api/v1/users/verify-otp", data),
+  resendOTP: (data) => api.post("api/v1/users/resend-otp", data),
   getCurrentUser: async () => {
-    const response = await api.get("/users/current-user")
+    const response = await api.get("/api/v1/users/current-user")
     return response.data
   },
-  forgotPassword: (email) => api.post("/users/forgot-password", { email }),
-  resetPassword: (token, password) => api.post(`/users/reset-password/${token}`, { password }),
+  forgotPassword: (email) => api.post("/api/v1/users/forgot-password", { email }),
+  resetPassword: (token, password) => api.post(`/api/v1/users/reset-password/${token}`, { password }),
   refreshToken: async () => {
-    const response = await api.post("/users/refresh-token")
+    const response = await api.post("/api/v1/users/refresh-token")
     return response.data
   },
   updateProfile: async (userData) => {
-    const response = await api.patch("/users/update-account", userData)
+    const response = await api.patch("/api/v1/users/update-account", userData)
     return response.data
   },
 
   changePassword: async (passwordData) => {
-    const response = await api.post("/users/change-password", passwordData)
+    const response = await api.post("/api/v1/users/change-password", passwordData)
     return response.data
   },
 }
@@ -106,27 +104,27 @@ export const authAPI = {
 export const predictionAPI = {
   // Save prediction (create)
   savePrediction: async (predictionData) => {
-    const response = await api.post("/predictions", predictionData)
+    const response = await api.post("/api/v1/predictions", predictionData)
     return response.data
   },
   // Get user predictions
   getUserPredictions: async (params = {}) => {
-    const response = await api.get("/predictions", { params })
+    const response = await api.get("/api/v1/predictions", { params })
     return response.data
   },
   // Get single prediction
   getPredictionById: async (predictionId) => {
-    const response = await api.get(`/predictions/${predictionId}`)
+    const response = await api.get(`/api/v1/predictions/${predictionId}`)
     return response.data
   },
   // Delete prediction
   deletePrediction: async (predictionId) => {
-    const response = await api.delete(`/predictions/${predictionId}`)
+    const response = await api.delete(`/api/v1/predictions/${predictionId}`)
     return response.data
   },
   // Get prediction statistics
   getPredictionStats: async () => {
-    const response = await api.get("/predictions/stats")
+    const response = await api.get("/api/v1/predictions/stats")
     return response.data
   },
 }
@@ -135,32 +133,32 @@ export const predictionAPI = {
 export const sharedPredictionAPI = {
   // Share prediction with doctor
   sharePrediction: async (shareData) => {
-    const response = await api.post("/shared-predictions/share", shareData)
+    const response = await api.post("/api/v1/shared-predictions/share", shareData)
     return response.data
   },
   // Get user's shared predictions
   getUserSharedPredictions: async (params = {}) => {
-    const response = await api.get("/shared-predictions/my-shares", { params })
+    const response = await api.get("/api/v1/shared-predictions/my-shares", { params })
     return response.data
   },
   // Get doctor's received predictions
   getDoctorReceivedPredictions: async (params = {}) => {
-    const response = await api.get("/shared-predictions/received", { params })
+    const response = await api.get("/api/v1/shared-predictions/received", { params })
     return response.data
   },
   // View shared prediction (for doctors)
   viewSharedPrediction: async (shareCode) => {
-    const response = await api.get(`/shared-predictions/view/${shareCode}`)
+    const response = await api.get(`/api/v1/shared-predictions/view/${shareCode}`)
     return response.data
   },
   // Respond to shared prediction (for doctors)
   respondToSharedPrediction: async (shareCode, responseData) => {
-    const response = await api.post(`/shared-predictions/respond/${shareCode}`, responseData)
+    const response = await api.post(`/api/v1/shared-predictions/respond/${shareCode}`, responseData)
     return response.data
   },
   // Revoke shared prediction access
   revokeSharedPrediction: async (shareId) => {
-    const response = await api.patch(`/shared-predictions/revoke/${shareId}`)
+    const response = await api.patch(`/api/v1/shared-predictions/revoke/${shareId}`)
     return response.data
   },
 }

@@ -80,7 +80,7 @@ export const authAPI = {
   verifyOTP: (data) => api.post("/api/v1/users/verify-otp", data),
   resendOTP: (data) => api.post("api/v1/users/resend-otp", data),
   getCurrentUser: async () => {
-    const response = await api.get("/api/v1/users/current-user")
+    const response = await api.get("/api/v1/users/me")
     return response.data
   },
   forgotPassword: (email) => api.post("/api/v1/users/forgot-password", { email }),
